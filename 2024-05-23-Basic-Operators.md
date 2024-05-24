@@ -337,10 +337,111 @@ range.contains(-1)  //true
 ```
 
 
+## 1.7 逻辑运算符
+
+逻辑运算符修改或组合布尔逻辑值 true 和 false 。 Swift 支持基于 C 的语言中的三种标准逻辑运算符：
+
+- 逻辑非 **!a**
+- 逻辑与 **a && b** 
+- 逻辑或 **a || b**
+
+### 1.7.1 逻辑非运算符
+
+逻辑 NOT 运算符 ( !a ) 反转布尔值，使 true 变为 false ，并且 false 变为 true .
+
+逻辑 NOT 运算符是前缀运算符，紧邻其运算值之前出现，没有任何空格。它可以读作“not a ”，如下例所示：
+
+```swift
+let allowEntry = false
+if !allowEntry{
+    print("Acess Denied")
+}
+```
+
+短语 if !allowedEntry 可以理解为“如果不允许进入”。仅当“不允许进入”为 true 时才执行后续行；也就是说，如果 allowedEntry 是 false 。
+
+如本示例所示，仔细选择布尔常量和变量名称有助于保持代码的可读性和简洁性，同时避免双重否定或令人困惑的逻辑语句。
+
+### 1.7.2 逻辑与运算符
+
+逻辑 AND 运算符 ( a && b ) 创建逻辑表达式，其中两个值都必须为 true ，以使整个表达式也为 true 。
+
+如果任一值为 false ，则整体表达式也将为 false 。事实上，如果第一个值是 false ，则甚至不会计算第二个值，因为它不可能使整个表达式等于 true 。这称为短路评估。
+
+此示例考虑两个 Bool 值，并且仅当两个值都是 true 时才允许访问：
 
 
-```swift```
+```swift
+let enteredDoorCode = true
+let passedRetinaScan = false
+if enteredDoorCode && passedRetinaScan {
+    print("Welcome!")
+} else {
+    print("ACCESS DENIED")
+}
+// Prints "ACCESS DENIED"
+```
 
+### 1.7.3 逻辑或运算符
+
+
+逻辑 OR 运算符 ( a || b ) 是由两个相邻管道字符组成的中缀运算符。您可以使用它来创建逻辑表达式，其中只有两个值之一必须为 true 才能使整个表达式为 true 。
+
+与上面的逻辑 AND 运算符类似，逻辑 OR 运算符使用短路求值来考虑其表达式。如果逻辑 OR 表达式的左侧是 true ，则不会计算右侧，因为它无法更改整个表达式的结果。
+
+在下面的示例中，第一个 Bool 值 ( hasDoorKey ) 是 false ，但第二个值 ( knowsOverridePassword ) 是 true 。由于一个值​​为 true ，整个表达式的计算结果也为 true ，并且允许访问：
+```swift
+let hasDoorKey = false
+let knowsOverridePassword = true
+if hasDoorKey || knowsOverridePassword {
+    print("Welcome!")
+} else {
+    print("ACCESS DENIED")
+}
+// Prints "Welcome!"
+```
+
+### 1.7.4 组合逻辑运算符
+
+您可以组合多个逻辑运算符来创建更长的复合表达式：
+
+```swift
+if enteredDoorCode && passedRetinaScan || hasDoorKey || knowsOverridePassword {
+    print("Welcome!")
+} else {
+    print("ACCESS DENIED")
+}
+// Prints "Welcome!"
+```
+
+此示例使用多个 && 和 || 运算符来创建更长的复合表达式。但是， && 和 || 运算符仍然只对两个值进行操作，因此这实际上是链接在一起的三个较小的表达式。该示例可以解读为：
+
+如果我们输入了正确的门密码并通过了视网膜扫描，或者如果我们有有效的门钥匙，或者如果我们知道紧急覆盖密码，则允许访问。
+
+根据 enteredDoorCode 、 passedRetinaScan 和 hasDoorKey 的值，前两个子表达式是 false 。但是，紧急覆盖密码已知，因此整个复合表达式的计算结果仍为 true 。
+
+
+**Note:**
+Swift 逻辑运算符 && 和 || 是左关联的，这意味着具有多个逻辑运算符的复合表达式首先计算最左边的子表达式。
+
+
+### 1.7.5 显式括号
+
+有时，在并非严格需要的情况下包含括号很有用，以使复杂表达式的意图更易于阅读。
+在上面的门禁示例中，在复合表达式的第一部分周围添加括号以使其意图明确非常有用：
+
+```swift
+if (enteredDoorCode && passedRetinaScan) || hasDoorKey || knowsOverridePassword {
+    print("Welcome!")
+} else {
+    print("ACCESS DENIED")
+}
+// Prints "Welcome!"
+```
+
+括号清楚地表明前两个值被视为整体逻辑中单独的可能状态的一部分。复合表达式的输出没有改变，但总体意图对读者来说更加清晰。
+
+可读性始终优先于简洁性；使用括号有助于明确您的意图。
 
 
 
