@@ -3,7 +3,7 @@ layout: post
 author: "大西瓜"
 title: "The Basics"
 date:   2024-05-22 12:30:07 +0800
-categories: [update,Note] 
+categories: [update,Swift] 
 ---
 
 ## 1.基础知识
