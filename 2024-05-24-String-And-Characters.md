@@ -542,15 +542,268 @@ for index in greeting.indices {
 
 ### 1.16 字符串插入和移除
 
+
+
+
+
+#### 1.16.1 字符串插入 
+
 要将单个字符插入字符串中的指定索引处，请使用 insert(_:at:) 方法；要将另一个字符串的内容插入指定索引处，请使用 insert(contentsOf:at:) 方法。
 
 
 
+```swift
+var welcome = "hello"
+welcome.insert("!", at: welcome.endIndex)
+//output:hello!
+
+welcome.insert(contentsOf: "xigua", at: welcome.index(before: welcome.endIndex))
+//output: helloxigua!
+
+```
+
+以上代码为**函数重载**
 
 
 
 
 
------
+
+
+#### 1.16.2 字符串删除
+
+要从字符串中指定索引处删除单个字符，请使用 `remove(at:)` 方法，要删除指定范围内的子字符串，请使用 `removeSubrange(_:)` 方法：
+
+```swift
+
+welcome.remove(at: welcome.index(before:welcome.endIndex))
+//output:hello xigua
+
+let range = welcome.index(welcome.startIndex, offsetBy: 5)..<welcome.endIndex
+//range a..<b 
+welcome.removeSubrange(range)
+//output:hello
+```
+
+
+
+**Note:**
+
+您可以在符合 `RangeReplaceableCollection` 、 `insert(contentsOf:at:)` 、 `remove(at:)` 和 `removeSubrange(_:)` 方法> 协议。这包括 `String` ，如此处所示，以及集合类型，例如 `Array` 、 `Dictionary` 和 `Set` 。
+
+
+
+### 1.17 子串Substrings
+
+当您从字符串中获取子字符串时（例如，使用下标或 `prefix(_:)` 之类的方法），结果是 `Substring` 的实例，而不是另一个字符串。 Swift 中的子字符串与字符串具有大部分相同的方法，这意味着您可以像处理字符串一样处理子字符串。但是，与字符串不同的是，在对字符串执行操作时，您仅在很短的时间内使用子字符串。
+
+当您准备好长期存储结果时，可以将子字符串转换为 `String` 的实例。例如：
+
+```swift
+let greeting = "Hello, world!"
+let index = greeting.firstIndex(of: ",") ?? greeting.endIndex
+let beginning = greeting[..<index]
+// beginning is "Hello"
+
+
+// Convert the result to a String for long-term storage.
+let newString = String(beginning)
+```
+
+与字符串一样，每个子字符串都有一个存储区域，其中存储组成子字符串的字符。
+
+字符串和子字符串之间的区别在于，作为性能优化，子字符串可以重用用于存储原始字符串的部分内存，或用于存储另一个子字符串的部分内存。
+
+（字符串也有类似的优化，但如果两个字符串共享内存，它们是相等的。）这种性能优化意味着您不必付出复制内存的性能成本，直到修改字符串或子字符串。
+
+
+
+如上所述，子字符串不适合长期存储 - 因为它们重复使用原始字符串的存储，只要使用其任何子字符串，整个原始字符串就必须保留在内存中。
+
+在上面的示例中， `greeting` 是一个字符串，这意味着它有一个内存区域，用于存储组成该字符串的字符。由于 `beginning` 是 `greeting` 的子字符串，因此它重用 `greeting` 使用的内存。相反， `newString` 是一个字符串——当它是从子字符串创建时，它有自己的存储空间。下图展示了这些关系：
+
+![](https://docs.swift.org/swift-book/images/stringSubstring@2x.png)
+
+**Note 笔记**:
+
+`String` 和 `Substring` 都符合 `StringProtocol` 协议，这意味着字符串操作函数接受 `StringProtocol` 值通常很方便。您可以使用 `String` 或 `Substring` 值调用此类函数。
+
+
+
+### 1.18 比较字符串
+
+Swift 提供了三种比较文本值的方法：字符串和字符相等、前缀相等和后缀相等。
+
+使用“等于”运算符 ( `==` ) 和“不等于”运算符 ( `!=` ) 检查字符串和字符相等性，如比较运算符中所述：
+
+```swift
+let quotation = "We're a lot alike, you and I."
+let sameQuotation = "We're a lot alike, you and I."
+if quotation == sameQuotation {
+    print("These two strings are considered equal")
+}
+// Prints "These two strings are considered equal"
+```
+
+
+
+如果两个 `String` 值（或两个 `Character` 值）的扩展字素簇在规范上等效，则认为它们相等。如果扩展字素簇具有相同的语言含义和外观，则它们在规范上是等效的，即使它们在幕后由不同的 Unicode 标量组成。
+
+
+
+例如， `LATIN SMALL LETTER E WITH ACUTE` ( `U+00E9` ) 规范地相当于 `LATIN SMALL LETTER E` ( `U+0065` ) 后跟 `COMBINING ACUTE ACCENT` ( < b5>）。这两个扩展字素簇都是表示字符 `é` 的有效方式，因此它们被认为是规范等价的：
+
+
+
+```swift
+// "Voulez-vous un café?" using LATIN SMALL LETTER E WITH ACUTE
+let eAcuteQuestion = "Voulez-vous un caf\u{E9}?"
+
+
+// "Voulez-vous un café?" using LATIN SMALL LETTER E and COMBINING ACUTE ACCENT
+let combinedEAcuteQuestion = "Voulez-vous un caf\u{65}\u{301}?"
+
+
+if eAcuteQuestion == combinedEAcuteQuestion {
+    print("These two strings are considered equal")
+}
+// Prints "These two strings are considered equal"
+```
+
+相反，英语中使用的 `LATIN CAPITAL LETTER A` （ `U+0041` 或 `"A"` ）不等于 `CYRILLIC CAPITAL LETTER A` （ `U+0410` ），如俄语中所用。这些字符在视觉上相似，但没有相同的语言含义：
+
+```swift
+let latinCapitalLetterA: Character = "\u{41}"
+
+
+let cyrillicCapitalLetterA: Character = "\u{0410}"
+
+
+if latinCapitalLetterA != cyrillicCapitalLetterA {
+    print("These two characters aren't equivalent.")
+}
+// Prints "These two characters aren't equivalent."
+```
+
+
+
+**Note 笔记**
+Swift 中的字符串和字符比较不区分区域设置。
+
+
+
+#### 1.18.2 字符串前缀和后缀相等
+
+要检查字符串是否具有特定的字符串前缀或后缀，请调用字符串的 `hasPrefix(_:)` 和 `hasSuffix(_:)` 方法，这两个方法都采用 `String` 类型的单个参数，并且返回一个布尔值。
+
+
+
+下面的示例考虑表示莎士比亚的《罗密欧与朱丽叶》前两幕场景位置的字符串数组：
+
+
+
+```swift
+let romeoAndJuliet = [
+    "Act 1 Scene 1: Verona, A public place",
+    "Act 1 Scene 2: Capulet's mansion",
+    "Act 1 Scene 3: A room in Capulet's mansion",
+    "Act 1 Scene 4: A street outside Capulet's mansion",
+    "Act 1 Scene 5: The Great Hall in Capulet's mansion",
+    "Act 2 Scene 1: Outside Capulet's mansion",
+    "Act 2 Scene 2: Capulet's orchard",
+    "Act 2 Scene 3: Outside Friar Lawrence's cell",
+    "Act 2 Scene 4: A street in Verona",
+    "Act 2 Scene 5: Capulet's mansion",
+    "Act 2 Scene 6: Friar Lawrence's cell"
+]
+```
+
+
+
+您可以使用 `hasPrefix(_:)` 方法和 `romeoAndJuliet` 数组来计算该剧第一幕中的场景数：
+
+```swift
+var act1SceneCount = 0
+for scene in romeoAndJuliet {
+    if scene.hasPrefix("Act 1 ") {
+        act1SceneCount += 1
+    }
+}
+print("There are \(act1SceneCount) scenes in Act 1")
+// Prints "There are 5 scenes in Act 1"
+```
+
+
+
+，使用 `hasSuffix(_:)` 方法来计算发生在 Capulet 宅邸和 Friar Lawrence 牢房内或周围的场景数量：
+
+```swift
+var mansionCount = 0
+var cellCount = 0
+for scene in romeoAndJuliet {
+    if scene.hasSuffix("Capulet's mansion") {
+        mansionCount += 1
+    } else if scene.hasSuffix("Friar Lawrence's cell") {
+        cellCount += 1
+    }
+}
+print("\(mansionCount) mansion scenes; \(cellCount) cell scenes")
+// Prints "6 mansion scenes; 2 cell scenes"
+```
+
+
+
+### 1.19 字符串的unicode表示形式
+
+当将 Unicode 字符串写入文本文件或其他存储时，该字符串中的 Unicode 标量将以几种 Unicode 定义的编码形式之一进行编码。每种形式都将字符串编码为称为代码单元的小块。其中包括 UTF-8 编码形式（将字符串编码为 8 位代码单元）、UTF-16 编码形式（将字符串编码为 16 位代码单元）和 UTF-32 编码形式（将字符串编码为 16 位代码单元）。作为 32 位代码单元的字符串）。
+
+
+
+
+当将 Unicode 字符串写入文本文件或其他存储时，该字符串中的 Unicode 标量将以几种 Unicode 定义的编码形式之一进行编码。每种形式都将字符串编码为称为代码单元的小块。其中包括 UTF-8 编码形式（将字符串编码为 8 位代码单元）、UTF-16 编码形式（将字符串编码为 16 位代码单元）和 UTF-32 编码形式（将字符串编码为 16 位代码单元）。作为 32 位代码单元的字符串）。
+
+
+Swift 提供了几种不同的方法来访问字符串的 Unicode 表示形式。您可以使用 `for` - `in` 语句迭代字符串，以将其各个 `Character` 值作为 Unicode 扩展字素簇进行访问。使用角色中描述了此过程。
+
+
+或者，以其他三种 Unicode 兼容表示形式之一访问 `String` 值：
+
+- UTF-8 代码单元的集合（通过字符串的 `utf8` 属性访问）
+
+- UTF-16 代码单元的集合（通过字符串的 `utf16` 属性访问）
+
+- 21 位 Unicode 标量值的集合，相当于字符串的 UTF-32 编码形式（通过字符串的 `unicodeScalars` 属性访问
+
+  下面的每个示例都显示了以下字符串的不同表示形式，该字符串由字符 `D` 、 `o` 、 `g` 、 `‼` 组成（ `DOUBLE EXCLAMATION MARK` ，或 Unicode 标量 `U+203C` ），以及 🐶 字符（ `DOG FACE` ，或 Unicode 标量 `U+1F436` ）：
+
+
+
+```swift
+let dogString = "Dog‼🐶"
+```
+
+
+
+### 1.20 UTF-8表示
+
+您可以通过迭代 `utf8` 属性来访问 `String` 的 UTF-8 表示形式。此属性的类型为 `String.UTF8View` ，它是无符号 8 位 ( `UInt8` ) 值的集合，每个字节对应字符串的 UTF-8 表示形式：
+
+```swift
+let dogString = "Dog‼🐶"
+for codeUnit in dogString.utf8 {
+    print("\(codeUnit) ", terminator: "")
+}
+print("")
+// Prints "68 111 103 226 128 188 240 159 144 182 "
+```
+
+![](https://docs.swift.org/swift-book/images/UTF8@2x.png)
+
+
+
+
+
+
+
 ```swift```
 ref:https://docs.swift.org/swift-book/documentation/the-swift-programming-language/stringsandcharacters
