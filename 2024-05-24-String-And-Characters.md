@@ -755,6 +755,8 @@ print("\(mansionCount) mansion scenes; \(cellCount) cell scenes")
 
 ### 1.19 字符串的unicode表示形式
 
+
+
 当将 Unicode 字符串写入文本文件或其他存储时，该字符串中的 Unicode 标量将以几种 Unicode 定义的编码形式之一进行编码。每种形式都将字符串编码为称为代码单元的小块。其中包括 UTF-8 编码形式（将字符串编码为 8 位代码单元）、UTF-16 编码形式（将字符串编码为 16 位代码单元）和 UTF-32 编码形式（将字符串编码为 16 位代码单元）。作为 32 位代码单元的字符串）。
 
 
@@ -784,6 +786,63 @@ let dogString = "Dog‼🐶"
 
 
 
+#### 1.19.1 unicode编码
+
+在 Unicode 编码中（尤其是 UTF-8 编码），判断一个字符占用多少个字节是通过前导字节的模式来进行的。具体来说，UTF-8 使用一个可变长度的编码，每个字符可以占用 1 到 4 个字节。以下是详细的规则：
+
+**UTF-8 字节长度判断规则**
+
+1. **单字节字符**（ASCII 码）：如果第一个字节的前导位是 `0`，则表示这是一个单字节字符（7 位），即标准 ASCII 范围（0x00 到 0x7F）。
+   - 例如：`0xxxxxxx`（0 到 127）
+
+2. **多字节字符**：
+   - **两字节字符**：如果第一个字节的前导位是 `110`，则表示这是一个两字节字符（11 位）。
+     - 例如：`110xxxxx 10xxxxxx`
+   - **三字节字符**：如果第一个字节的前导位是 `1110`，则表示这是一个三字节字符（16 位）。
+     - 例如：`1110xxxx 10xxxxxx 10xxxxxx`
+   - **四字节字符**：如果第一个字节的前导位是 `11110`，则表示这是一个四字节字符（21 位）。
+     - 例如：`11110xxx 10xxxxxx 10xxxxxx 10xxxxxx`
+
+**UTF-8 前导字节模式**
+
+- **1 字节**（7 位）：`0xxxxxxx`
+- **2 字节**（11 位）：`110xxxxx 10xxxxxx`
+- **3 字节**（16 位）：`1110xxxx 10xxxxxx 10xxxxxx`
+- **4 字节**（21 位）：`11110xxx 10xxxxxx 10xxxxxx 10xxxxxx`
+
+**例子**
+
+1. **单字节字符**（如 `U+0041` 对应的 ASCII 字符 `A`）：
+   - 二进制：`01000001`
+   - UTF-8 编码：`0x41`（单字节）  
+
+2. **两字节字符**（如 `U+00A9` 对应的版权符号 `©`）：
+   - 二进制：`00000000 10101001`
+   - UTF-8 编码：`0xC2 0xA9`（两字节） **0B 1101 0010     1010 1001**
+
+3. **三字节字符**（如 `U+20AC` 对应的欧元符号 `€`）：
+   - 二进制：`00100000 10101100`
+   - UTF-8 编码：`0xE2 0x82 0xAC`（三字节） **0B 1110 0010   1000 0010    10101100 **
+
+4. **四字节字符**（如 `U+1F600` 对应的表情符号 `😀`）：
+   - 二进制：`00000001 11110110 00000000`
+   - UTF-8 编码：`0xF0 0x9F 0x98 0x80`（四字节） **0B 11110000 10011111 10011000 10000000**
+
+**UTF-8 编码规则总结**
+
+- **1 字节**：`0xxxxxxx` （0x00 - 0x7F）
+- **2 字节**：`110xxxxx 10xxxxxx` （0xC0 - 0xDF，0x80 - 0xBF）
+- **3 字节**：`1110xxxx 10xxxxxx 10xxxxxx` （0xE0 - 0xEF，0x80 - 0xBF，0x80 - 0xBF）
+- **4 字节**：`11110xxx 10xxxxxx 10xxxxxx 10xxxxxx` （0xF0 - 0xF7，0x80 - 0xBF，0x80 - 0xBF，0x80 - 0xBF）
+
+**参考资料**
+
+- [Unicode Standard](https://unicode.org/standard/standard.html)
+- [UTF-8 Encoding Table and Unicode Character Map](https://www.utf8-chartable.de/)
+- [Wikipedia - UTF-8](https://en.wikipedia.org/wiki/UTF-8)
+
+通过这些规则和资源，你可以更好地理解和判断 Unicode 字符在 UTF-8 编码中的字节数。
+
 ### 1.20 UTF-8表示
 
 您可以通过迭代 `utf8` 属性来访问 `String` 的 UTF-8 表示形式。此属性的类型为 `String.UTF8View` ，它是无符号 8 位 ( `UInt8` ) 值的集合，每个字节对应字符串的 UTF-8 表示形式：
@@ -801,9 +860,131 @@ print("")
 
 
 
+#### 1.20.1 UTF-8的编码过程
+
+U+1F436
+
+是的，`U+1F436` 的 UTF-8 编码表示为 `0b11110000 10011111 10010000 10100110`，对应的十六进制值是 `0xF0 0x9F 0x90 0xA6`。让我们详细解释一下这个编码过程：
+
+**编码过程**
+
+1. **Unicode 代码点**：`U+1F436` 表示狗脸表情符号 🐶。其十进制表示为 128054。
+
+2. **转换为二进制**：
+   - 128054 的二进制表示为 `0001 1111 0100 0110`。
+
+3. **UTF-8 编码规则**：
+   - 根据 UTF-8 编码规则，对于位数超过 16 位的字符（即代码点在 `U+10000` 到 `U+10FFFF` 范围内的字符），使用 4 个字节表示。
+   - 4 字节的格式为：`11110xxx 10xxxxxx 10xxxxxx 10xxxxxx`。
+
+4. **填充二进制数据**：
+   - 将 `0001 1111 0100 0110` 分成 4 个部分，并填充到 4 字节的格式中：
+     - `11110` 后面是 3 个最左边的位：`0001`，得到：`11110000`
+     - `10` 后面是接下来的 6 位：`011111`，得到：`10011111`
+     - `10` 后面是接下来的 6 位：`010000`，得到：`10010000`
+     - `10` 后面是最后的 6 位：`011011`，得到：`10100110`
+
+**结果**
+
+因此，`U+1F436` 在 UTF-8 中的表示为：
+
+- 二进制：`11110000 10011111 10010000 10100110`
+- 十六进制：`0xF0 0x9F 0x90 0xA6`
+
+**解释**
+
+- **UTF-8 View**：将字符转换为 UTF-8 编码并逐字节打印，输出如下：
+  ```swift
+  let dogEmoji: Character = "\u{1F436}"
+  let utf8View = dogEmoji.utf8
+  for byte in utf8View {
+      print(String(format: "0x%02X", byte))
+  }
+  ```
+  输出：
+  ```
+  0xF0
+  0x9F
+  0x90
+  0xA6
+  ```
+
+**确认**
+
+让我们用 Swift 代码确认上述编码是否正确：
+
+```swift
+let dogEmoji: Character = "\u{1F436}"
+let utf8Bytes = Array(dogEmoji.utf8)
+print(utf8Bytes.map { String(format: "0x%02X", $0) })
+```
+
+输出：
+```
+["0xF0", "0x9F", "0x90", "0xA6"]
+```
+
+这个输出确认了 `U+1F436` 在 UTF-8 中的表示为 `0xF0 0x9F 0x90 0xA6`，即二进制形式为 `11110000 10011111 10010000 10100110`。
 
 
 
+
+
+
+
+### 1.21 UTF-16 表示法
+
+您可以通过迭代 `utf16` 属性来访问 `String` 的 UTF-16 表示形式。此属性的类型为 `String.UTF16View` ，它是无符号 16 位 ( `UInt16` ) 值的集合，每个值对应字符串 UTF-16 表示形式中的每个 16 位代码单元：
+
+![](https://docs.swift.org/swift-book/images/UTF16@2x.png)
+
+
+
+```swift
+for codeUnit in dogString.utf16 {
+    print("\(codeUnit) ", terminator: "")
+}
+print("")
+// Prints "68 111 103 8252 55357 56374 "
+```
+
+
+
+同样，前三个 `codeUnit` 值（ `68` 、 `111` 、 `103` ）代表字符 `D` 、 < b5> 和 `g` ，其 UTF-16 代码单元具有与字符串的 UTF-8 表示形式相同的值（因为这些 Unicode 标量表示 ASCII 字符）。
+
+
+
+
+
+### 1.22 Unicode 标量表示
+
+您可以通过迭代 `unicodeScalars` 属性来访问 `String` 值的 Unicode 标量表示形式。此属性的类型为 `UnicodeScalarView` ，它是 `UnicodeScalar` 类型的值的集合。
+
+每个 `UnicodeScalar` 都有一个 `value` 属性，该属性返回标量的 21 位值，用 `UInt32` 值表示：
+
+
+
+![](https://docs.swift.org/swift-book/images/UnicodeScalar@2x.png)
+
+```swift
+let dogString = "Dog‼🐶"
+for sc  in dogString.unicodeScalars{
+    print(sc,terminator: " ")
+}
+//output:D o g ! ! 🐶 
+```
+
+前三个 `UnicodeScalar` 值（ `68` 、 `111` 、 `103` ）的 `value` 属性再次代表字符 `D` 、 `o` 和 `g` 。
+
+第四个 `codeUnit` 值 ( `8252` ) 也是十六进制值 `203C` 的十进制等价物，它表示 Unicode 标量 `U+203C` `DOUBLE EXCLAMATION MARK` 字符。
+
+第五个也是最后一个 `UnicodeScalar` 的 `value` 属性 `128054` 是十六进制值 `1F436` 的十进制等效值，它表示 Unicode `DOG FACE` 字符的标量 `U+1F436` 。
+
+作为查询 `value` 属性的替代方法，每个 `UnicodeScalar` 值也可用于构造新的 `String` 值，例如使用字符串插值：
+
+
+
+-- -
 
 ```swift```
 ref:https://docs.swift.org/swift-book/documentation/the-swift-programming-language/stringsandcharacters
